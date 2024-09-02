@@ -28,7 +28,7 @@ void Main() {
 }
 
 void InjectCustomButton() {
-    string mlCode = IO::FromFile("src/manialink.xml");
+    string mlCode = _IO::File::ReadSourceFileToEnd("src/manialink.xml");
     MLHook::InjectManialinkToPlayground("", mlCode, false);
 }
 
