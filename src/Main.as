@@ -17,10 +17,18 @@ void Main() {
     }
 
     NadeoServices::AddAudience("NadeoLiveServices");
+
+    if (IO::FileExists(IO::FromStorageFolder("FavoriteMapsToRemove.txt"))) {
+        array<string> remainingUids = LoadUidsFromFile();
+        if (remainingUids.Length > 0) {
+            NotifyInfo("Resume Removal", "You have unfinished favorite map removals. Resuming...", 10000);
+            startnew(RemoveMapsFromFile);
+        }
+    }
 }
 
 void InjectCustomButton() {
-    string mlCode = _IO::File::ReadSourceFileToEnd("src/manialink.xml");
+    string mlCode = IO::FromFile("src/manialink.xml");
     MLHook::InjectManialinkToPlayground("", mlCode, false);
 }
 
@@ -52,8 +60,14 @@ void RemoveMapsFromFile() {
     array<string> uids = LoadUidsFromFile();
     for (uint i = 0; i < uids.Length; i++) {
         RemoveFavoriteMap(uids[i]);
+        uids.RemoveAt(i);
+        SaveUidsToFile(uids);
+        i--;
+        sleep(2000);
     }
+
     NotifyInfo("Favorites Removed", "All favorite maps have been removed.");
+    IO::Delete(IO::FromStorageFolder("FavoriteMapsToRemove.txt"));
 }
 
 array<string> GetFavoriteMapUids() {
@@ -100,7 +114,7 @@ void RemoveFavoriteMap(const string &in mapUid) {
 }
 
 void SaveUidsToFile(array<string> uids) {
-    IO::File file("FavoriteMapsToRemove.txt", IO::FileMode::Write);
+    IO::File file(IO::FromStorageFolder("FavoriteMapsToRemove.txt"), IO::FileMode::Write);
     for (uint i = 0; i < uids.Length; i++) {
         file.Write(uids[i] + "\n");
     }
@@ -109,8 +123,8 @@ void SaveUidsToFile(array<string> uids) {
 
 array<string> LoadUidsFromFile() {
     array<string> uids;
-    if (IO::FileExists("FavoriteMapsToRemove.txt")) {
-        IO::File file("FavoriteMapsToRemove.txt", IO::FileMode::Read);
+    if (IO::FileExists(IO::FromStorageFolder("FavoriteMapsToRemove.txt"))) {
+        IO::File file(IO::FromStorageFolder("FavoriteMapsToRemove.txt"), IO::FileMode::Read);
         while (!file.EOF()) {
             string line = file.ReadLine();
             if (line != "") {
