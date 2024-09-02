@@ -1,5 +1,9 @@
 [meta]
-name = ""
+name = "No Favorites"
 author = "ar....."
 version = "0.1.0"
-category = ""
+category = "Utilities"
+
+[script]
+dependencies = [ "NadeoServices" ]
+optional_dependencies = [ "MLHook" ]

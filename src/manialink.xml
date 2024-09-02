@@ -1,0 +1,6 @@
+<manialink id="CustomRemoveFavoritesButton">
+    <frame pos="15 0" z-index="0"> <!-- Adjust position based on the sort button's position -->
+        <quad pos="0 0" z-index="0" size="20 5" bgcolor="000F" action="RemoveAllFavorites" />
+        <label pos="0 0" z-index="1" size="20 5" text="Remove Favorites" textsize="1" valign="center" halign="center" />
+    </frame>
+</manialink>
