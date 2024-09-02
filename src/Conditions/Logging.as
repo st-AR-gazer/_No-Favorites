@@ -1,4 +1,4 @@
-string pluginName = "Plugin Name";
+string pluginName = "Remove Favorite Maps";
 
 void NotifyInfo(const string &in overwritePluginName = pluginName, const string &in msg = "", int time = 6000) {
     UI::ShowNotification(overwritePluginName, msg, vec4(.2, .8, .5, .3), time);

@@ -1,9 +1,8 @@
 [meta]
-name = "No Favorites"
+name = "Remove Favorite Maps"
 author = "ar....."
 version = "0.1.0"
 category = "Utilities"
 
 [script]
 dependencies = [ "NadeoServices" ]
-optional_dependencies = [ "MLHook" ]

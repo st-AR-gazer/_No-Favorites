@@ -1,4 +1,4 @@
-[Setting name="Remove All Favorites"]
+[Setting name="Remove All Favorites" category="General"]
 bool S_removeAllFavorites = false;
 
 void Update(float dt) {
@@ -9,13 +9,6 @@ void Update(float dt) {
 }
 
 void Main() {
-    if (Meta::GetPluginFromID("MLHook") !is null) {
-        MLHook::RegisterMLHook(HookExample(), "CustomRemoveFavoritesButton");
-        InjectCustomButton();
-    } else {
-        NotifyWarn("MLHook not found", "MLHook is not installed. The custom button will not be injected, but you can still use the script, through the Openplanet settings.");
-    }
-
     NadeoServices::AddAudience("NadeoLiveServices");
 
     if (IO::FileExists(IO::FromStorageFolder("FavoriteMapsToRemove.txt"))) {
@@ -23,23 +16,6 @@ void Main() {
         if (remainingUids.Length > 0) {
             NotifyInfo("Resume Removal", "You have unfinished favorite map removals. Resuming...", 10000);
             startnew(RemoveMapsFromFile);
-        }
-    }
-}
-
-void InjectCustomButton() {
-    string mlCode = _IO::File::ReadSourceFileToEnd("src/manialink.xml");
-    MLHook::InjectManialinkToPlayground("", mlCode, false);
-}
-
-class HookExample : MLHook::HookMLEventsByType {
-    HookExample() {
-        super("CustomRemoveFavoritesButton");
-    }
-
-    void OnEvent(const string &in type, const string[] &in data) {
-        if (type == "RemoveAllFavorites") {
-            startnew(RemoveAllFavoriteMaps);
         }
     }
 }
@@ -52,9 +28,18 @@ void RemoveAllFavoriteMaps() {
 
     array<string> favoriteMapUids = GetFavoriteMapUids();
     if (favoriteMapUids.Length == 0) {
-        NotifyInfo("No Favorites", "You don't have any favorite maps.");
+        NotifyInfo("Remove Favorites", "You don't have any favorite maps.");
         return;
     }
+
+    uint mapCount = favoriteMapUids.Length;
+
+    float estimatedTime = (mapCount * 2.0f) / 60.0f;
+    string formattedTime = Text::Format("%.2f", estimatedTime);
+
+    uint seconds = mapCount * 2;
+
+    NotifyInfo("Estimated Time", "Removing " + mapCount + " maps will take approximately " + formattedTime + " minutes (" + seconds + " seconds).", 10000);
 
     SaveUidsToFile(favoriteMapUids);
     RemoveMapsFromFile();
@@ -63,7 +48,7 @@ void RemoveAllFavoriteMaps() {
 void RemoveMapsFromFile() {
     array<string> uids = LoadUidsFromFile();
     for (uint i = 0; i < uids.Length; i++) {
-        RemoveFavoriteMap(uids[i]);
+        RemoveFavoriteMap(uids[i], "" + (uids.Length - i - 1));
         uids.RemoveAt(i);
         SaveUidsToFile(uids);
         i--;
@@ -106,7 +91,7 @@ array<string> GetFavoriteMapUids() {
     return mapUids;
 }
 
-void RemoveFavoriteMap(const string &in mapUid) {
+void RemoveFavoriteMap(const string &in mapUid, const string &in mapsLeft = "") {
     auto req = NadeoServices::Post("NadeoLiveServices", 
         "https://live-services.trackmania.nadeo.live/api/token/map/favorite/" + mapUid + "/remove");
     req.Start();
@@ -114,6 +99,8 @@ void RemoveFavoriteMap(const string &in mapUid) {
 
     if (req.ResponseCode() != 200) {
        NotifyError("Error", "Failed to remove map " + mapUid);
+    } else if (req.ResponseCode() == 200) {
+        log("Map removed: " + mapUid + " there are " + mapsLeft + " maps left.", LogLevel::Info, 94, "RemoveFavoriteMap");
     }
 }
 
@@ -138,8 +125,4 @@ array<string> LoadUidsFromFile() {
         file.Close();
     }
     return uids;
-}
-
-void OnDestroyed() {
-    MLHook::UnregisterMLHooksAndRemoveInjectedML();
 }
