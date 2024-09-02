@@ -33,7 +33,7 @@ void InjectCustomButton() {
 }
 
 class HookExample : MLHook::HookMLEventsByType {
-    void OnEvent(const string &in type, const string[] &in data) override {
+    void OnEvent(const string &in type, const string[] &in data) {
         if (type == "RemoveAllFavorites") {
             startnew(RemoveAllFavoriteMaps);
         }
